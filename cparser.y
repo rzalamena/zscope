@@ -1,7 +1,11 @@
+%{
 /*
  * This file was shamelessly stolen from:
  * http://www.lysator.liu.se/c/ANSI-C-grammar-y.html
  */
+
+#include <zscope.h>
+%}
 %token IDENTIFIER CONSTANT STRING_LITERAL SIZEOF
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -14,13 +18,17 @@
 
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
+%token <v.string> IDENTIFIER
+%token <v.string> STRING_LITERAL
+%token <v.string> GOTO
+
 %start translation_unit
 %%
 
 primary_expression
-	: IDENTIFIER { zs_register_symbol(zc_parsectx, zs_file, zs_line, (const char *) $1, ZT_VARIABLE, 0); }
+	: IDENTIFIER { zs_register_symbol(zc_parsectx, zs_file, zs_line, $1, ZT_VARIABLE, 0); }
 	| CONSTANT
-	| STRING_LITERAL { zs_register_symbol(zc_parsectx, zs_file, zs_line, (const char *) $1, ZT_STRING, 1); }
+	| STRING_LITERAL { zs_register_symbol(zc_parsectx, zs_file, zs_line, $1, ZT_STRING, 1); }
 	| '(' expression ')'
 	;
 
@@ -29,7 +37,7 @@ postfix_expression
 	| postfix_expression '[' expression ']'
 	| postfix_expression '(' ')'
 	| postfix_expression '(' argument_expression_list ')'
-	| postfix_expression '.' IDENTIFIER { zs_register_symbol(zc_parsectx, zs_file, zs_line, (const char *) $3, ZT_VARIABLE, 0); }
+	| postfix_expression '.' IDENTIFIER { zs_register_symbol(zc_parsectx, zs_file, zs_line, $3, ZT_VARIABLE, 0); }
 	| postfix_expression PTR_OP IDENTIFIER
 	| postfix_expression INC_OP
 	| postfix_expression DEC_OP
@@ -202,9 +210,9 @@ type_specifier
 	;
 
 struct_or_union_specifier
-	: struct_or_union IDENTIFIER { zs_register_symbol(zc_parsectx, zs_file, zs_line, (const char *) $2, ZT_DEFINE, 1); } '{' struct_declaration_list '}'
+	: struct_or_union IDENTIFIER { zs_register_symbol(zc_parsectx, zs_file, zs_line, $2, ZT_DEFINE, 1); } '{' struct_declaration_list '}'
 	| struct_or_union '{' struct_declaration_list '}'
-	| struct_or_union IDENTIFIER { zs_register_symbol(zc_parsectx, zs_file, zs_line, (const char *) $2, ZT_DEFINE, 1); }
+	| struct_or_union IDENTIFIER { zs_register_symbol(zc_parsectx, zs_file, zs_line, $2, ZT_DEFINE, 1); }
 	;
 
 struct_or_union
@@ -241,8 +249,8 @@ struct_declarator
 
 enum_specifier
 	: ENUM '{' enumerator_list '}'
-	| ENUM IDENTIFIER { zs_register_symbol(zc_parsectx, zs_file, zs_line, (const char *) $2, ZT_DEFINE, 1); } '{' enumerator_list '}'
-	| ENUM IDENTIFIER { zs_register_symbol(zc_parsectx, zs_file, zs_line, (const char *) $2, ZT_DEFINE, 1); }
+	| ENUM IDENTIFIER { zs_register_symbol(zc_parsectx, zs_file, zs_line, $2, ZT_DEFINE, 1); } '{' enumerator_list '}'
+	| ENUM IDENTIFIER { zs_register_symbol(zc_parsectx, zs_file, zs_line, $2, ZT_DEFINE, 1); }
 	;
 
 enumerator_list
@@ -305,8 +313,8 @@ parameter_declaration
 	;
 
 identifier_list
-	: IDENTIFIER { zs_register_symbol(zc_parsectx, zs_file, zs_line, (const char *) $1, ZT_VARIABLE, 0); }
-	| identifier_list ',' IDENTIFIER { zs_register_symbol(zc_parsectx, zs_file, zs_line, (const char *) $1, ZT_VARIABLE, 0); }
+	: IDENTIFIER { zs_register_symbol(zc_parsectx, zs_file, zs_line, $1, ZT_VARIABLE, 0); }
+	| identifier_list ',' IDENTIFIER { zs_register_symbol(zc_parsectx, zs_file, zs_line, $3, ZT_VARIABLE, 0); }
 	;
 
 type_name

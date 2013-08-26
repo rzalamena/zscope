@@ -12,6 +12,7 @@ IS			(u|U|l|L)*
  */
 
 #include <y.tab.h>
+#include <zscope.h>
 
 size_t zs_line = 0;
 int column = 0;
@@ -180,6 +181,6 @@ check_type()
 /*
 *	it actually will only return IDENTIFIER
 */
-
+	yylval.v.string = strdup(yytext);
 	return(IDENTIFIER);
 }

@@ -3,6 +3,8 @@
 
 #include <sys/queue.h>
 
+#include <string.h>
+
 #define EPRINTF(fmt, args...) \
 	do { \
 		fprintf(stderr, "(%s:%d) " fmt "\n", \
@@ -43,6 +45,15 @@ struct zs_ctx;
 int zs_register_symbol(struct zs_ctx *, const char *, size_t, const char *, enum zitem_type, int);
 struct zs_ctx *zs_new_ctx(void);
 void zs_free_ctx(struct zs_ctx *);
+
+/* Parser stuff */
+typedef struct {
+	union {
+		char		*string;
+	} v;
+} YYSTYPE;
+
+extern YYSTYPE yylval;
 
 extern size_t zs_line;
 extern const char *zs_file;

@@ -47,7 +47,7 @@ struct zs_ctx {
 #define ZSS_USAGETABLE \
 	"SELECT file_id, symbol_id, line, is_definition FROM usagetable WHERE symbol_id = %zd;"
 #define ZSI_USAGETABLE \
-	"INSERT INTO symboltable (file_id, symbol_id, line, is_definition) VALUES (%zd, %zd, %zd, %d);"
+	"INSERT INTO usagetable (file_id, symbol_id, line, is_definition) VALUES (%zd, %zd, %zd, %d);"
 
 #define MAX_QUERY_SIZE	(256)
 enum query_result {
@@ -251,7 +251,7 @@ zs_register_symbol(struct zs_ctx *zc, const char *file, size_t line,
 		return (-1);
 	}
 
-	symbolid = zs_get_symbolid(zc, file, type);
+	symbolid = zs_get_symbolid(zc, symbol, type);
 	if (symbolid == SIZE_MAX) {
 		EPRINTF("Could not register symbol '%s'", file);
 		return (-1);
