@@ -27,7 +27,7 @@
 		    __FILE__, __LINE__, ## args); \
 	} while (0)
 
-#define ZSCOPE_DEBUG (0)
+#define ZSCOPE_DEBUG (1)
 #define DPRINTF(fmt, args...) \
 	do { \
 		if (ZSCOPE_DEBUG) \
