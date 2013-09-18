@@ -19,10 +19,14 @@ int column = 0;
 
 static void comment(void);
 static void count(void);
+static void definition(void);
+static void include(void);
 %}
 
 %%
 "/*"			{ comment(); }
+"#define"		{ definition(); }
+"#include"		{ include(); }
 
 "auto"			{ count(); return(AUTO); }
 "break"			{ count(); return(BREAK); }
@@ -129,22 +133,88 @@ yywrap(void)
 }
 
 static void
+include(void)
+{
+	char	c;
+
+	while ((c = input()) != '>' && c != 0);
+}
+
+static void
+definition(void)
+{
+	int	next, backslash, endofdef;
+	size_t	bufpos;
+	char	c, buf[256];
+
+	bufpos = 0;
+	endofdef = next = backslash = 0;
+
+loop:
+	c = input();
+	if (c == 0) {
+		buf[bufpos] = 0;
+		zs_register_symbol(zc_parsectx, zs_file, zs_line, buf,
+		    ZT_DEFINE, 1);
+		return;
+	}
+
+	switch (c) {
+	case ' ':
+	case '\t':
+		if (bufpos > 0)
+			endofdef = 1;
+
+		next = 1;
+		break;
+	case '\\':
+		next = 1;
+		backslash = 1;
+		break;
+	case '\n':
+		zs_line++;
+		if (backslash == 0) {
+			next = 0;
+			break;
+		}
+
+		backslash = 0;
+		next = 1;
+		break;
+
+	default:
+		if (endofdef == 1)
+			break;
+
+		buf[bufpos++] = c;
+		break;
+	}
+	if (next == 0) {
+		buf[bufpos] = 0;
+		zs_register_symbol(zc_parsectx, zs_file, zs_line, buf,
+		    ZT_DEFINE, 1);
+		return;
+	}
+	goto loop;
+}
+
+static void
 comment(void)
 {
 	char c, c1;
 
 loop:
 	while ((c = input()) != '*' && c != 0)
-		putchar(c);
+		if (c == '\n')
+			zs_line++;
 
-	if ((c1 = input()) != '/' && c != 0)
-	{
+	if ((c1 = input()) != '/' && c != 0) {
+		if (c == '\n')
+			zs_line++;
+
 		unput(c1);
 		goto loop;
 	}
-
-	if (c != 0)
-		putchar(c1);
 }
 
 static void

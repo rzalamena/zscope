@@ -103,9 +103,9 @@ zscope_parse_dir(const char *directory)
 		}
 
 		dlen = strlen(d->d_name);
-		if (d->d_name[dlen - 2] != '.' &&
-		    (d->d_name[dlen - 1] != 'c' ||
-		    d->d_name[dlen - 1] != 'h')) {
+		if (!(d->d_name[dlen - 2] == '.' &&
+		    (d->d_name[dlen - 1] == 'c' ||
+		    d->d_name[dlen - 1] == 'h'))) {
 			DPRINTF("'%s' is not a source file", d->d_name);
 			continue;
 		}
